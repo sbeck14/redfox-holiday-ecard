@@ -2,7 +2,7 @@ const asyncPool = require('tiny-async-pool');
 const fs = require('fs');
 const config = require('./config.json');
 
-const htmlEmail = fs.readFileSync('./index.html').toString();
+const htmlEmail = fs.readFileSync('./email.html').toString();
 
 const send = require('gmail-send')({
   user: config.user,
