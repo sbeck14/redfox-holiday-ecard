@@ -11,6 +11,7 @@
   "license": "ISC",
   "dependencies": {
     "gmail-send": "^1.8.10",
+    "pretty-ms": "^7.0.1",
     "tiny-async-pool": "^1.2.0"
   }
 }
