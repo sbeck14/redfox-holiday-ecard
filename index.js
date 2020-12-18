@@ -5,6 +5,11 @@ const prettyMs = require('pretty-ms');
 
 const snooze = ms => new Promise(resolve => setTimeout(resolve, ms));
 
+const getTimestamp = () => {
+  const d = new Date();
+  return `${d.getMonth()}_${d.getDate()}_${d.getFullYear()}-${d.getHours()}_${d.getMinutes()}`;
+}
+
 const success = [];
 const failed = [];
 
@@ -26,7 +31,6 @@ const colors = {
 const emails = fs.readFileSync('emails.txt', 'utf-8').split('\n');
 
 async function sendEmail(to) {
-  await snooze(500)
   try {
     await send({ to, html: emailBody });
     success.push(to);
@@ -43,16 +47,21 @@ async function doWork() {
     console.log(`Sending ${emails.length} emails...`);
     
     const start = new Date().getTime();
+    const ts = getTimestamp();
     
     await asyncPool(2, emails, sendEmail);
 
     const end = new Date().getTime();
-    
-    fs.writeFileSync('success.json', JSON.stringify(success, null, 2));
-    fs.writeFileSync('failed.json', JSON.stringify(failed, null, 2));
-
     const duration = end - start;
-    
+
+    const resultPayload = {
+      time: ts,
+      duration: prettyMs(duration),
+      completed: success,
+      failed: failed,
+    };
+    fs.writeFileSync(`results-${ts}.json`, JSON.stringify(resultPayload, null, 2));
+
     console.log(`Sent ${success.length} emails in ${prettyMs(duration)}`);
     
     if (failed.length > 0) {
