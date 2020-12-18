@@ -1,3 +1,5 @@
 node_modules
 config.json
 emails.txt
+failed.json
+success.json
