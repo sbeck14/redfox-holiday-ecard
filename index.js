@@ -3,6 +3,13 @@ const fs = require('fs');
 const config = require('./config.json');
 const prettyMs = require('pretty-ms');
 
+const gmailSend = require('./mailer.js')({
+  user: config.user,
+  pass: config.pass,
+  from: config.from,
+  subject: config.subject,
+});
+
 const snooze = ms => new Promise(resolve => setTimeout(resolve, ms));
 
 const getTimestamp = () => {
@@ -15,13 +22,6 @@ const failed = [];
 
 const emailBody = fs.readFileSync('./email.html').toString();
 
-const send = require('gmail-send')({
-  user: config.user,
-  pass: config.pass,
-  from: config.from,
-  subject: config.subject,
-});
-
 const colors = {
   green: '\u001b[32m',
   red: '\u001b[31m',
@@ -31,15 +31,16 @@ const colors = {
 const emails = fs.readFileSync('emails.txt', 'utf-8').split('\n');
 
 async function sendEmail(to) {
+  snooze(3000)
   try {
-    await send({ to, html: emailBody });
+    await gmailSend.send({ to, html: emailBody });
     success.push(to);
     console.log(`${colors.green}✓${colors.reset}  ${to}`);
   } catch (err) {
     failed.push(to);
     console.log(`${colors.red}✗${colors.reset}  ${to}\n\t${err}`);
   }
-  await snooze(500)
+  await snooze(3000)
 }
 
 async function doWork() {
@@ -61,6 +62,8 @@ async function doWork() {
       failed: failed,
     };
     fs.writeFileSync(`results-${ts}.json`, JSON.stringify(resultPayload, null, 2));
+
+    gmailSend.transport.close();
 
     console.log(`Sent ${success.length} emails in ${prettyMs(duration)}`);
     
