@@ -31,7 +31,6 @@ const colors = {
 const emails = fs.readFileSync('emails.txt', 'utf-8').split('\n');
 
 async function sendEmail(to) {
-  snooze(3000)
   try {
     await gmailSend.send({ to, html: emailBody });
     success.push(to);
